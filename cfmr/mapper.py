@@ -6,9 +6,6 @@ logger.setLevel(logging.DEBUG)
 
 def handle(event, ctx, mapperFunction):
     logger.debug('got event{}'.format(event))
-    logger.debug('got client context{}'.format(ctx.client_context))
-
-    logger.debug(inspect.getmembers(ctx.client_context))
 
     em = Emitter(
         ctx.client_context.custom['outputBucket'],
