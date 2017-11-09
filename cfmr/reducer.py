@@ -1,9 +1,9 @@
 from .emitter import Emitter
 import logging
 import boto3
+import json
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
 
 s3 = boto3.resource('s3')
 

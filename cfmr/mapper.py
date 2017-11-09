@@ -3,7 +3,6 @@ import logging
 import boto3
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
 
 s3 = boto3.resource('s3')
 
@@ -18,7 +17,9 @@ def handle(event, ctx, mapperFunction):
     )
 
     mapKey = event['key']
+    logger.debug(f"mapKey:{mapKey}")
     inputBucket = ctx.client_context.custom['inputBucket']
+    logger.debug(f"inputBucket:{inputBucket}")
 
     obj = s3.Object(inputBucket, mapKey)
     dataObj = obj.get()['Body'].read()
