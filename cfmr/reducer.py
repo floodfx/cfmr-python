@@ -1,8 +1,11 @@
 from .emitter import Emitter
 import logging
+import boto3
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
+
+s3 = boto3.resource('s3')
 
 def handle(event, ctx, reducerFunction):
     logger.debug('got event{}'.format(event))
