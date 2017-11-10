@@ -83,8 +83,8 @@ def reduce(key, values, emitter):
   return None # your reduce output or None
 ```
 `reduce` is automatically called by the cfmr framework and is passed:
-* `key` - the path of the input data
-* `values` - a collection of values in the same type as outputted by the `mapper`
+* `key` - the bytes or value of the partition key
+* `values` - a collection of values in the same type as outputted by the `mapper` for this partition key
 * `emitter` - a framework helper to which you should write output from the reducer (again discussed above)
 
 ### Example
