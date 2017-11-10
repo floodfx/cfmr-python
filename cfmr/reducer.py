@@ -1,7 +1,9 @@
 from .emitter import Emitter
+from functools import reduce
 import logging
 import boto3
 import json
+
 
 logger = logging.getLogger()
 
@@ -30,14 +32,16 @@ def handle(event, ctx, reducerFunction):
     logger.debug(f"allData: {allData}")
 
     # decode data
-    def decodeData(jsonData):
-        value = jsonData['value']
-        if(jsonData['valueIsBase64']):
-            return codecs.decode(value, 'base64')
-        else:
-            return value
+    def decodeData(allValues, jsonData):
+        values = jsonData['values']
+        for v in values:
+            if(v['valueIsBase64']):
+                allValues.append(codecs.decode(v['value'], 'base64'))
+            else:
+                allValues.append(v['value'])
+        return allValues
 
-    values = list(map(decodeData, allData))
+    values = reduce(decodeData, allData, [])
 
     # decode key
     key = allData[0]['key']

@@ -6,6 +6,7 @@ import codecs
 import hashlib
 import binascii
 import inspect
+from collections import defaultdict
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -15,26 +16,33 @@ s3 = boto3.resource('s3')
 class Emitter(object):
 
     def __init__(self, outputBucket, outputPrefix, jobId, emitterType):
-        self.emitBuffer = []
+        self.emitBuffer = defaultdict(list)
         self.outputBucket = outputBucket
         self.outputPrefix = outputPrefix
         self.jobId = jobId
         self.emitterType = emitterType
 
     def emit(self, key, value):
-        self.emitBuffer.append([key, value])
+        self.emitBuffer[key].append(value)
 
     def flushEmits(self):
-        for x in self.emitBuffer:
-            self.flushEmit(x[0], x[1])
+        for key in self.emitBuffer:
+            self.flushEmit(key, self.emitBuffer[key])
 
-    def flushEmit(self, key, value):
-        logger.debug(f"flushing {key}, {value}")
+    def flushEmit(self, key, values):
+        logger.debug(f"flushing {key}, {values}")
         keyIsBuffer = type(key).__name__ is 'bytes'
         outputKey = codecs.encode(key, 'base64') if keyIsBuffer else key
 
-        valueIsBuffer = type(value).__name__ is 'bytes'
-        outputValue = codecs.encode(value, 'base64') if valueIsBuffer else value
+        allValues = []
+        for v in values:
+            valueIsBuffer = type(v).__name__ is 'bytes'
+            outputValue = codecs.encode(v, 'base64') if valueIsBuffer else v
+            value = {
+                'value': outputValue,
+                'valueIsBase64': valueIsBuffer,
+            }
+            allValues.append(value)
 
         # for S3 keys
         h = hashlib.sha256()
@@ -47,18 +55,12 @@ class Emitter(object):
 
         flushKey = f"{self.outputPrefix}/{self.jobId}/{self.emitterType}/{partitionKey}/{partKey}"
 
-        logger.debug(f"Flushing key: {key}, value: {value}, to s3://{self.outputBucket}/{flushKey}")
+        logger.debug(f"Flushing key: {key}, values: {allValues}, to s3://{self.outputBucket}/{flushKey}")
 
         body = {
           'key': outputKey,
           'keyIsBase64': keyIsBuffer,
-          'value': outputValue,
-          'valueIsBase64': valueIsBuffer,
+          'values': allValues
         }
         obj = s3.Object(self.outputBucket, flushKey)
         obj.put(Body=json.dumps(body).encode('utf-8'))
-
-
-
-
-
