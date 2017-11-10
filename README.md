@@ -88,7 +88,7 @@ def reduce(key, values, emitter):
 * `emitter` - a framework helper to which you should write output from the reducer (again discussed above)
 
 ### Example
-Here is the `mapper` and `reducer` implementations for the canonical example of wordcound:
+Here is the `mapper` and `reducer` implementations for the canonical example of wordcount:
 
 #### `mapper`
 ```python
