@@ -134,7 +134,8 @@ def handle(event, ctx):
     reducer.handle(event, ctx, reduce)
 ```
 
-### Build & Uploading to PyPi
+### Other Notes
+Build & Uploading to PyPi
 * run `python setup.py sdist` to build
 * run `twine upload dist/*` to deploy
 * wait (up to) 5 minutes for new version to show up in `pip`
